@@ -1,0 +1,342 @@
+@if (roomStateService.room$ | async; as room) {
+
+  <!-- ── AUCTION DONE SUMMARY ── -->
+  @if (room.status === 'done') {
+    <div class="summary-container">
+      <div class="summary-header">
+        <h2>Auction Complete 🏏</h2>
+        <button mat-raised-button class="export-btn" (click)="exportExcel(room)">
+          <mat-icon>download</mat-icon>
+          Export Excel
+        </button>
+      </div>
+
+      <table mat-table [dataSource]="getSummaryRows(room)" class="summary-table">
+        <ng-container matColumnDef="team">
+          <th mat-header-cell *matHeaderCellDef>Team</th>
+          <td mat-cell *matCellDef="let row">{{ row.team }}</td>
+        </ng-container>
+        <ng-container matColumnDef="playersBought">
+          <th mat-header-cell *matHeaderCellDef>Players</th>
+          <td mat-cell *matCellDef="let row">{{ row.playersBought }}</td>
+        </ng-container>
+        <ng-container matColumnDef="totalSpent">
+          <th mat-header-cell *matHeaderCellDef>Spent</th>
+          <td mat-cell *matCellDef="let row">₹{{ row.totalSpent }} Cr</td>
+        </ng-container>
+        <ng-container matColumnDef="remainingBudget">
+          <th mat-header-cell *matHeaderCellDef>Remaining</th>
+          <td mat-cell *matCellDef="let row">₹{{ row.remainingBudget }} Cr</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="summaryCols"></tr>
+        <tr mat-row *matRowDef="let row; columns: summaryCols;"></tr>
+      </table>
+
+      @for (row of getSummaryRows(room); track row.team) {
+        @if (row.players.length > 0) {
+          <div class="team-breakdown">
+            <h4>{{ row.team }}</h4>
+            <mat-list dense>
+              @for (p of row.players; track p.playerName) {
+                <mat-list-item>{{ p.playerName }} — ₹{{ p.soldFor }} Cr</mat-list-item>
+              }
+            </mat-list>
+          </div>
+        }
+      }
+    </div>
+
+  <!-- ── LIVE AUCTION ── -->
+  } @else {
+    @if (currentPlayer(room); as player) {
+      <div class="auction-page">
+
+        <!-- ── Player section: left | center | right ── -->
+        <div class="player-section">
+
+          <!-- Col 1: My Team (centered in left 1fr) -->
+          <div class="my-team-panel">
+            <div class="my-team-title">My Team</div>
+            <div class="my-team-name">{{ teamName }}</div>
+            <div class="my-team-budget-row">
+              <div class="my-team-stat">
+                <span class="my-team-stat-label">Spent</span>
+                <span class="my-team-stat-value spent">₹{{ r2(100 - myBudget(room)) }} Cr</span>
+              </div>
+              <div class="my-team-stat">
+                <span class="my-team-stat-label">Budget</span>
+                <span class="my-team-stat-value budget">₹{{ myBudget(room) }} Cr</span>
+              </div>
+            </div>
+            @let myPlayers = getTeamPlayers(room, teamName);
+            @if (myPlayers.length > 0) {
+              <div class="my-team-list">
+                @for (p of myPlayers; track p.playerName) {
+                  <div class="my-team-entry">
+                    <span class="my-team-player-name">{{ p.playerName }}</span>
+                    <span class="my-team-price">₹{{ p.soldFor }} Cr</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="my-team-empty">No players yet</p>
+            }
+          </div>
+
+          <!-- Col 2: Bid History -->
+          <div class="bid-history-panel">
+            <div class="bid-history-title">Bid History</div>
+            @let history = getBidHistory(room);
+            @if (history.length > 0) {
+              <div class="bid-history-list">
+                @for (entry of history; track entry.at; let i = $index) {
+                  <div class="bid-entry" [class.bid-entry-top]="i === 0">
+                    <div class="bid-entry-top-row">
+                      <span class="bid-entry-team">{{ entry.team }}</span>
+                      <span class="bid-entry-amount">₹{{ entry.amount }} Cr</span>
+                    </div>
+                    <span class="bid-entry-time">{{ formatTime(entry.at) }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="bid-history-empty">No bids yet</p>
+            }
+          </div>
+
+          <!-- Center: Player card -->
+          <div class="player-card-col">
+            <mat-card class="player-card">
+
+              <div class="player-hero">
+                <div class="player-hero-meta">
+                  @if (player.iplTeam) {
+                    <span class="player-badge team-badge">{{ player.iplTeam }}</span>
+                  }
+                  @if (player.role) {
+                    <span class="player-badge role-badge">{{ player.role }}</span>
+                  }
+                  @if (player.marqueeType) {
+                    <span class="player-badge marquee-badge">{{ player.marqueeType }}</span>
+                  }
+                </div>
+                <div class="player-hero-name">{{ player.name }}</div>
+                <div class="player-hero-base">Base price · ₹{{ player.basePrice }} Cr</div>
+              </div>
+
+              <mat-card-content>
+
+                <div class="live-bid-section">
+                  <div class="live-bid-main">
+                    <span class="stat-label">Current Bid</span>
+                    <span class="live-bid-amount">₹{{ room.currentBid }} Cr</span>
+                    <span class="live-bid-bidder">{{ room.currentBidder ?? 'No bids yet' }}</span>
+                  </div>
+                  <div class="live-bid-side">
+                    <span class="stat-label">Your Budget</span>
+                    <span class="live-bid-budget">₹{{ myBudget(room) }} Cr</span>
+                  </div>
+                </div>
+
+                <mat-divider />
+
+                <div class="bid-input-section">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Your bid (₹ Cr)</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      [ngModel]="bidInput()"
+                      (ngModelChange)="bidInput.set($event)"
+                    />
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" [disabled]="bidDisabled(room)" (click)="placeBid(room)">
+                    {{ placing ? 'Placing…' : 'Place Bid' }}
+                  </button>
+                </div>
+
+                <div class="quick-bid-row">
+                  <span class="quick-bid-label">Quick bid</span>
+                  @for (inc of [0.1, 0.5, 1]; track inc) {
+                    <button
+                      mat-stroked-button
+                      class="quick-bid-btn"
+                      [disabled]="quickBidDisabled(room, inc)"
+                      (click)="quickBid(room, inc)"
+                    >+{{ inc }} Cr</button>
+                  }
+                </div>
+
+              </mat-card-content>
+            </mat-card>
+
+            <div class="queue-info">
+              <span class="queue-stat sold">✓ Sold <strong>{{ room.soldPlayers.length }}</strong></span>
+              <span class="queue-divider">·</span>
+              <span class="queue-stat unsold">⏳ Remaining <strong>{{ room.players.length - room.currentPlayerIndex }}</strong></span>
+            </div>
+          </div> <!-- /.player-card-col -->
+
+          <!-- Col 4: Up Next -->
+          <div class="up-next-panel">
+            <div class="up-next-title">Up Next</div>
+            @let upcoming = getUpcomingPlayers(room);
+            @if (upcoming.length > 0) {
+              <div class="up-next-list">
+                @for (p of upcoming; track p.name) {
+                  <div class="up-next-entry">
+                    <div class="up-next-name">{{ p.name }}</div>
+                    <div class="up-next-meta">
+                      @if (p.marqueeType) {
+                        <span class="up-next-badge">{{ p.marqueeType }}</span>
+                      }
+                      <span class="up-next-base">₹{{ p.basePrice }} Cr</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="up-next-empty">Last player</p>
+            }
+          </div>
+
+          <!-- Col 5: Auctioneer (centered in right 1fr) -->
+          @if (isAuctioneer(room)) {
+            <mat-card class="auctioneer-card">
+              <div class="auctioneer-card-header">
+                <span class="auctioneer-card-title">🔨 Auctioneer Controls</span>
+              </div>
+              <div class="auctioneer-card-body">
+                <div class="pick-player-section">
+                  <span class="pick-player-label">Pick next player</span>
+                  <mat-form-field appearance="outline" class="pick-player-field">
+                    <mat-label>Select player</mat-label>
+                    <mat-select
+                      [ngModel]="pickedPlayerIndex()"
+                      (ngModelChange)="pickedPlayerIndex.set($event)"
+                    >
+                      @for (p of getUnsoldPlayers(room); track p.index) {
+                        <mat-option [value]="p.index">
+                          {{ p.name }}
+                          @if (p.marqueeType) { <span class="pick-option-tier"> · {{ p.marqueeType }}</span> }
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <button
+                    mat-stroked-button
+                    class="pick-btn"
+                    [disabled]="pickedPlayerIndex() === null || picking"
+                    (click)="auctionNow()"
+                  >
+                    {{ picking ? 'Starting…' : 'Auction Now' }}
+                  </button>
+                </div>
+
+                <button mat-stroked-button class="skip-btn" [disabled]="skipping" (click)="skipPlayer()">
+                  {{ skipping ? 'Skipping…' : 'Skip Player' }}
+                </button>
+                <button mat-stroked-button class="undo-btn" [disabled]="!room.soldPlayers.length || undoing" (click)="undoLastSale(room)">
+                  {{ undoing ? 'Undoing…' : '↩ Undo Last Sale' }}
+                </button>
+                <button mat-raised-button class="sold-btn" [disabled]="!room.currentBidder || selling" (click)="markSold(room)">
+                  {{ selling ? 'Selling…' : 'Sold' }}
+                </button>
+              </div>
+            </mat-card>
+          }
+
+        </div> <!-- /.player-section -->
+
+        <!-- ── Teams panel (horizontal scroll) ── -->
+        <div class="teams-section">
+          <h3>Teams</h3>
+          <div class="teams-grid">
+            @for (team of room.teams; track team) {
+              @let remaining = room.teamBudgets[team];
+              @let spent = r2(100 - remaining);
+
+              <mat-card class="team-card" [class.active-bidder]="team === room.currentBidder">
+
+                <!-- Role badge strip (left) -->
+                <div class="team-role-strip">
+                  @for (b of getTeamRoleBadges(room, team); track b.role) {
+                    <div class="role-pill"
+                         [attr.data-role]="b.role"
+                         [class.role-pill-empty]="b.count === 0"
+                         [matTooltip]="b.title"
+                         matTooltipPosition="above">
+                      @if (b.isEmoji) {
+                        <span class="role-pill-emoji">{{ b.icon }}</span>
+                      } @else {
+                        <img class="role-pill-icon" [src]="b.icon" [alt]="b.role" />
+                      }
+                      <span class="role-pill-count">{{ b.count }}</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Main content (right) -->
+                <div class="team-card-main">
+                  <div class="team-header">
+                    <span class="team-name">{{ team }}</span>
+                    @if (team === room.currentBidder) {
+                      <span class="live-badge">BIDDING</span>
+                    }
+                  </div>
+
+                  <div class="budget-bar-wrap">
+                    <div class="budget-bar-fill" [style.width.%]="spent"></div>
+                  </div>
+
+                  <div class="money-row">
+                    <div class="money-stat spent">
+                      <span class="money-label">Spent</span>
+                      <span class="money-value">₹{{ spent }} Cr</span>
+                    </div>
+                    <div class="money-stat remaining">
+                      <span class="money-label">Left</span>
+                      <span class="money-value">₹{{ remaining }} Cr</span>
+                    </div>
+                  </div>
+
+                  @let teamPlayers = getTeamPlayers(room, team);
+                  @if (teamPlayers.length > 0) {
+                    <div class="team-players">
+                      @for (p of teamPlayers; track p.playerName) {
+                        <div class="player-row">
+                          <span class="player-row-name">{{ p.playerName }}</span>
+                          <span class="player-row-price">₹{{ p.soldFor }}</span>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="no-players">No players yet</p>
+                  }
+                </div>
+
+
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- ── Bottom action bar (auctioneer only) ── -->
+        @if (isAuctioneer(room)) {
+          <div class="auction-action-bar">
+            <button mat-raised-button class="end-auction-btn" (click)="endAuction()">
+              <mat-icon>flag</mat-icon>
+              End Auction
+            </button>
+          </div>
+        }
+
+      </div>
+    }
+  }
+
+} @else {
+  <p class="loading">Loading auction...</p>
+}

@@ -1,0 +1,60 @@
+<div class="register-page">
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <div class="register-card">
+
+    <div class="register-header">
+      <div class="register-icon">🏏</div>
+      <h2 class="register-title">Join the Auction</h2>
+      <div class="register-room-badge">
+        <span class="room-badge-label">Room</span>
+        <span class="room-badge-value">{{ roomId }}</span>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="register-form">
+
+      <mat-form-field appearance="outline" class="team-field">
+        <mat-label>Your Team Name</mat-label>
+        <mat-icon matPrefix>groups</mat-icon>
+        <input
+          matInput
+          formControlName="teamName"
+          placeholder="e.g. Chennai Super Kings"
+          autocomplete="off"
+        />
+        @if (form.controls.teamName.touched && form.controls.teamName.hasError('required')) {
+          <mat-error>Team name is required.</mat-error>
+        }
+        @if (form.controls.teamName.touched && form.controls.teamName.hasError('minlength')) {
+          <mat-error>Team name must be at least 3 characters.</mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        class="join-btn"
+        type="submit"
+        [disabled]="form.invalid || submitting()"
+      >
+        @if (submitting()) {
+          <span class="btn-inner">
+            <mat-spinner diameter="18" />
+            <span>Joining…</span>
+          </span>
+        } @else {
+          <span class="btn-inner">
+            <span>Join Auction</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </span>
+        }
+      </button>
+
+    </form>
+
+    <p class="register-hint">Your team name will be visible to all participants during the auction.</p>
+
+  </div>
+</div>

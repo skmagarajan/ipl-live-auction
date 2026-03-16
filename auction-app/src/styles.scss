@@ -1,0 +1,110 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+  ),
+));
+
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$azure-palette,
+  ),
+));
+
+html {
+  @include mat.all-component-themes($light-theme);
+
+  &.dark {
+    @include mat.all-component-themes($dark-theme);
+  }
+}
+
+/* ── CSS design tokens ── */
+:root {
+  --bg-page:            #f0f2f5;
+  --bg-card:            #ffffff;
+  --bg-card-alt:        #fafafa;
+  --bg-input:           #f9f9f9;
+  --text-primary:       #1a1a1a;
+  --text-secondary:     #555;
+  --text-muted:         #999;
+  --text-faint:         #ccc;
+  --border:             #e0e0e0;
+  --border-light:       #f0f0f0;
+  --shadow-sm:          rgba(0, 0, 0, 0.07);
+  --shadow-md:          rgba(0, 0, 0, 0.12);
+  --shadow-lg:          rgba(0, 0, 0, 0.18);
+
+  /* semantic */
+  --team-name-bg:       #f0f4ff;
+  --bid-top-bg:         #e8f5e9;
+  --bid-top-border:     #43a047;
+  --bid-top-amount:     #1b5e20;
+  --color-green:        #2e7d32;
+  --active-bidder-bg:   #fffde7;
+  --active-bidder-shadow: rgba(255, 193, 7, 0.25);
+  --bar-bg:             #f0f0f0;
+  --auctioneer-shadow:  rgba(245, 124, 0, 0.15);
+  --auctioneer-border:  rgba(245, 124, 0, 0.2);
+  --pick-divider:       #f0e0d0;
+  --undo-border:        #ef9a9a;
+  --undo-color:         #c62828;
+  --player-hero-start:  #1a237e;
+  --player-hero-mid:    #1565c0;
+  --player-hero-end:    #0277bd;
+
+  /* toggle button */
+  --toggle-bg:          rgba(0,0,0,0.06);
+  --toggle-hover-bg:    rgba(0,0,0,0.1);
+  --toggle-color:       #444;
+}
+
+html.dark {
+  --bg-page:            #0f0f0f;
+  --bg-card:            #1c1c1c;
+  --bg-card-alt:        #242424;
+  --bg-input:           #2a2a2a;
+  --text-primary:       #e2e2e2;
+  --text-secondary:     #aaa;
+  --text-muted:         #666;
+  --text-faint:         #444;
+  --border:             #2e2e2e;
+  --border-light:       #252525;
+  --shadow-sm:          rgba(0, 0, 0, 0.35);
+  --shadow-md:          rgba(0, 0, 0, 0.5);
+  --shadow-lg:          rgba(0, 0, 0, 0.65);
+
+  --team-name-bg:       #1a2744;
+  --bid-top-bg:         #162616;
+  --bid-top-border:     #388e3c;
+  --bid-top-amount:     #81c784;
+  --color-green:        #66bb6a;
+  --active-bidder-bg:   #1f1a00;
+  --active-bidder-shadow: rgba(255, 193, 7, 0.15);
+  --bar-bg:             #333;
+  --auctioneer-shadow:  rgba(245, 124, 0, 0.25);
+  --auctioneer-border:  rgba(245, 124, 0, 0.3);
+  --pick-divider:       #3a2a15;
+  --undo-border:        #6b2222;
+  --undo-color:         #ef9a9a;
+  --player-hero-start:  #0d1440;
+  --player-hero-mid:    #0d3570;
+  --player-hero-end:    #014f8a;
+
+  --toggle-bg:          rgba(255,255,255,0.08);
+  --toggle-hover-bg:    rgba(255,255,255,0.14);
+  --toggle-color:       #ccc;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  transition: background 0.25s, color 0.25s;
+}

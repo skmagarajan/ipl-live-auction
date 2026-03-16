@@ -1,0 +1,135 @@
+@if (roomStateService.room$ | async; as room) {
+  <div class="lobby-container">
+    <h2>Auction Lobby</h2>
+    <p class="room-id">Room: {{ roomId }}</p>
+
+    @if (room.auctioneer !== teamName) {
+      <!-- ── Waiting screen for non-auctioneers ── -->
+      <div class="waiting-screen">
+        <div class="waiting-emoji">🏏</div>
+        <h3 class="waiting-title">You're locked and loaded!</h3>
+        <p class="waiting-sub">The auctioneer is busy making important decisions.<br>Keep your wallet open and your nerves steady 💸</p>
+        <div class="waiting-badge">
+          <span class="waiting-label">Joining as</span>
+          <span class="waiting-team">{{ teamName }}</span>
+        </div>
+        <p class="waiting-hint">You'll be dropped into the auction automatically when it starts.</p>
+      </div>
+    } @else {
+
+    <!-- Invite link -->
+    <div class="invite-row">
+      <span class="invite-url">{{ registerUrl }}</span>
+      <button mat-icon-button [matTooltip]="copied ? 'Copied!' : 'Copy invite link'" (click)="copyRegisterUrl()">
+        <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Teams list -->
+    <section class="teams-section">
+      <h3>{{ room.teams.length }} team(s) joined</h3>
+      <mat-list>
+        @for (team of room.teams; track team) {
+          <mat-list-item>{{ team }}</mat-list-item>
+        }
+      </mat-list>
+    </section>
+
+    <mat-divider />
+
+    <!-- Marquee player order -->
+    <section class="players-section">
+      <h3>Marquee Players</h3>
+      <p class="section-hint">Drag to set the auction order. Each group will be auctioned together.</p>
+
+      <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="marquee-list">
+        @for (item of marqueeOrder; track item.key; let i = $index) {
+          <div cdkDrag class="marquee-item">
+            <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+            <span class="marquee-position">{{ i + 1 }}</span>
+            <span class="marquee-dot" [style.background]="item.color"></span>
+            <div class="marquee-info">
+              <span class="marquee-key">{{ item.key }}</span>
+              <span class="marquee-label">{{ item.label }}</span>
+            </div>
+            <span class="marquee-count">{{ item.count }} players</span>
+
+            <!-- Drag placeholder shown while dragging -->
+            <div *cdkDragPlaceholder class="drag-placeholder"></div>
+          </div>
+        }
+      </div>
+
+      @if (saveError) {
+        <p class="error">{{ saveError }}</p>
+      }
+
+      <div class="save-row">
+        <button mat-raised-button class="lobby-btn-secondary" [disabled]="saving" (click)="savePlayerOrder()">
+          <mat-icon>save</mat-icon>
+          {{ saving ? 'Saving...' : (room.players.length > 0 ? 'Re-save Order' : 'Save Player Order') }}
+        </button>
+        @if (room.players.length > 0) {
+          <span class="saved-badge">
+            <mat-icon>check_circle</mat-icon>
+            {{ room.players.length }} players saved
+          </span>
+        }
+      </div>
+    </section>
+
+    <mat-divider />
+
+    <!-- Auctioneer selection -->
+    <section class="auctioneer-section">
+      <h3>Auctioneer</h3>
+      @if (room.auctioneer) {
+        <div class="auctioneer-badge">
+          Auctioneer: <strong>{{ room.auctioneer }}</strong>
+        </div>
+      }
+      <mat-form-field appearance="outline">
+        <mat-label>Select auctioneer</mat-label>
+        <mat-select [value]="room.auctioneer" placeholder="Pick a team to run the auction" (valueChange)="onAuctioneerChange($event)">
+          @for (team of room.teams; track team) {
+            <mat-option [value]="team">{{ team }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </section>
+
+    <mat-divider />
+
+    <!-- Randomise pick -->
+    <section class="randomise-section">
+      <mat-slide-toggle
+        [checked]="room.randomisePick"
+        (change)="onRandomisePickChange($event.checked)"
+      >
+        Randomise pick
+      </mat-slide-toggle>
+      <p class="section-hint">When on, Sold &amp; Skip will randomly pick the next player from the same marquee tier.</p>
+    </section>
+
+    <mat-divider />
+
+    <!-- Start Auction -->
+    <section class="start-section">
+      <button
+        mat-raised-button
+        class="lobby-btn-primary"
+        [disabled]="!room.auctioneer || room.players.length === 0 || starting"
+        (click)="onStartAuction(room)"
+      >
+        {{ starting ? 'Starting...' : 'Start Auction' }}
+        @if (!starting) { <mat-icon>arrow_forward</mat-icon> }
+      </button>
+      @if (room.players.length === 0) {
+        <p class="hint">Save a player order before starting.</p>
+      }
+    </section>
+    } <!-- end @else auctioneer -->
+  </div>
+} @else {
+  <p>Loading room...</p>
+}

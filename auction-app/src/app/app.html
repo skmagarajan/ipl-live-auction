@@ -1,0 +1,4 @@
+<button class="theme-toggle" (click)="theme.toggle()" [title]="theme.dark() ? 'Switch to light mode' : 'Switch to dark mode'">
+  {{ theme.dark() ? '☀️' : '🌙' }}
+</button>
+<router-outlet />

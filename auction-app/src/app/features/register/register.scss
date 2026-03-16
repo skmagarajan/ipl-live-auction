@@ -1,0 +1,153 @@
+/* ── Register page ── */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, var(--player-hero-start) 0%, var(--player-hero-mid) 55%, var(--player-hero-end) 100%);
+  padding: 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.orb-1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+  top: -140px;
+  right: -100px;
+}
+
+.orb-2 {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  bottom: -60px;
+  left: -80px;
+}
+
+/* ── Card ── */
+.register-card {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 2.5rem 2.25rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.22),
+    0 32px 72px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Header ── */
+.register-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.register-icon {
+  font-size: 2.8rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15));
+}
+
+.register-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.register-room-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--team-name-bg);
+  border-radius: 100px;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--border);
+}
+
+.room-badge-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.room-badge-value {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ── Form ── */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.team-field {
+  width: 100%;
+}
+
+/* ── Join button ── */
+.join-btn {
+  height: 52px !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #1565c0 0%, #0277bd 100%) !important;
+  color: #fff !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 4px 18px rgba(21, 101, 192, 0.38) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+
+  &:hover:not([disabled]) {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 28px rgba(21, 101, 192, 0.48) !important;
+  }
+
+  &[disabled] {
+    opacity: 0.55 !important;
+    background: linear-gradient(135deg, #1565c0 0%, #0277bd 100%) !important;
+  }
+
+  mat-spinner {
+    --mdc-circular-progress-active-indicator-color: #fff;
+  }
+}
+
+/* Inner flex wrapper for button content (icon + text alignment) */
+.btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ── Hint ── */
+.register-hint {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 1.5rem 0 0;
+  line-height: 1.6;
+}

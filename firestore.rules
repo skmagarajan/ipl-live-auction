@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{roomId} {
+
+      // Anyone with the room link can read
+      allow read: if true;
+
+      // Room creation — must include all required fields
+      allow create: if request.resource.data.keys().hasAll([
+        'roomId', 'teams', 'status', 'auctioneer',
+        'players', 'currentPlayerIndex', 'currentBid',
+        'currentBidder', 'soldPlayers', 'teamBudgets'
+      ]);
+
+      // Updates allowed — room must exist and status must stay a valid value
+      allow update: if resource.data != null &&
+        request.resource.data.status in ['waiting', 'ready', 'auction', 'done'] &&
+        request.resource.data.roomId == resource.data.roomId;
+
+      // No deletions
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,151 @@
+.page-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  h2 { margin: 0; }
+}
+
+.result-count {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* ── Filters ── */
+.filters-panel {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.filter-search {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 150px;
+  }
+}
+
+.clear-btn {
+  margin-top: 4px;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: #fff;
+  font-size: 0.7rem;
+  margin-left: 4px;
+}
+
+/* ── Table ── */
+.table-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: auto;
+  max-height: calc(100vh - 320px);
+}
+
+.players-table {
+  width: 100%;
+}
+
+.name-cell {
+  font-weight: 500;
+}
+
+.uncapped-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6a1b9a;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  margin-left: 5px;
+  vertical-align: middle;
+  cursor: default;
+}
+
+.price-cell {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.team-chip {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.marquee-chip {
+  display: inline-block;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.overseas {
+  color: #7b1fa2;
+  font-weight: 500;
+}
+
+/* ── States ── */
+.hidden {
+  display: none;
+}
+
+.state-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 0;
+  color: #888;
+}
+
+.error {
+  color: #f44336;
+  padding: 1rem;
+}
+
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #aaa;
+}

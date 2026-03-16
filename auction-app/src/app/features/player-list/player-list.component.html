@@ -1,0 +1,158 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>IPL 2026 — Player List</h2>
+    @if (!loading()) {
+      <span class="result-count">
+        {{ dataSource.filteredData.length }} of {{ dataSource.data.length }} players
+      </span>
+    }
+  </div>
+
+  <!-- ── Filters ── -->
+  <form [formGroup]="filters" class="filters-panel">
+    <mat-form-field appearance="outline" class="filter-search">
+      <mat-label>Search player</mat-label>
+      <input matInput formControlName="search" placeholder="e.g. MS Dhoni" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Team</mat-label>
+        <mat-select formControlName="team">
+          <mat-option value="">All teams</mat-option>
+          @for (t of teams; track t) {
+            <mat-option [value]="t">{{ t }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select formControlName="role">
+          <mat-option value="">All roles</mat-option>
+          @for (r of roles; track r) {
+            <mat-option [value]="r">{{ r }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nationality</mat-label>
+        <mat-select formControlName="nationality">
+          <mat-option value="">All</mat-option>
+          @for (n of nationalities; track n) {
+            <mat-option [value]="n">{{ n }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Base Price (₹ Cr)</mat-label>
+        <mat-select formControlName="basePrice">
+          <mat-option [value]="null">All prices</mat-option>
+          @for (p of basePrices; track p) {
+            <mat-option [value]="p">₹{{ p }} Cr</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Marquee Type</mat-label>
+        <mat-select formControlName="marqueeType">
+          <mat-option value="">All types</mat-option>
+          @for (m of marqueeTypes; track m) {
+            <mat-option [value]="m">{{ m }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-stroked-button
+        class="clear-btn"
+        [disabled]="activeFilterCount === 0"
+        (click)="clearFilters()"
+        matTooltip="Clear all filters"
+      >
+        <mat-icon>filter_alt_off</mat-icon>
+        Clear
+        @if (activeFilterCount > 0) {
+          <span class="filter-badge">{{ activeFilterCount }}</span>
+        }
+      </button>
+    </div>
+  </form>
+
+  <!-- ── Loading spinner ── -->
+  @if (loading()) {
+    <div class="state-center">
+      <mat-spinner diameter="48" />
+      <p>Loading players...</p>
+    </div>
+  }
+
+  <!-- ── Error ── -->
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <!-- ── Table: always in DOM, hidden while loading so MatSort is available ── -->
+  <div class="table-container" [class.hidden]="loading() || !!error()">
+    <table mat-table [dataSource]="dataSource" matSort class="players-table">
+
+      <ng-container matColumnDef="index">
+        <th mat-header-cell *matHeaderCellDef>#</th>
+        <td mat-cell *matCellDef="let p; let i = index">{{ i + 1 }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Player</th>
+        <td mat-cell *matCellDef="let p" class="name-cell">
+          {{ p.name }}
+          @if (p.uncapped) {
+            <span class="uncapped-badge" matTooltip="Uncapped player">U</span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="iplTeam">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Team</th>
+        <td mat-cell *matCellDef="let p">
+          <span class="team-chip">{{ p.iplTeam }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+        <td mat-cell *matCellDef="let p">{{ p.role }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="nationality">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nationality</th>
+        <td mat-cell *matCellDef="let p">
+          <span [class.overseas]="p.nationality !== 'India'">{{ p.nationality }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="basePrice">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Base Price</th>
+        <td mat-cell *matCellDef="let p" class="price-cell">₹{{ p.basePrice }} Cr</td>
+      </ng-container>
+
+      <ng-container matColumnDef="marqueeType">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Marquee</th>
+        <td mat-cell *matCellDef="let p">
+          <span class="marquee-chip">{{ p.marqueeType }}</span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <!-- No results message lives outside <table> to avoid HTML parser issues -->
+    @if (!loading() && dataSource.filteredData.length === 0) {
+      <p class="no-data">No players match the current filters.</p>
+    }
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="home-page">
+
+  <!-- Decorative background orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="hero-content">
+
+    <div class="hero-badge">🏏 Fantasy Cricket Auction</div>
+
+    <h1 class="hero-title">
+      IPL Live<br>
+      <span class="hero-title-accent">Auction</span>
+    </h1>
+
+    <p class="hero-sub">
+      Real-time bidding platform for your fantasy squad.<br>
+      Build the ultimate IPL team with friends.
+    </p>
+
+    @if (loading()) {
+      <div class="hero-loading">
+        <mat-spinner diameter="22" />
+        <span>Creating your room…</span>
+      </div>
+    } @else {
+      <button mat-raised-button class="hero-cta" (click)="createRoom()">
+        Create Auction Room
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    }
+
+    <div class="feature-row">
+      <div class="feature-chip">⚡ Real-time bidding</div>
+      <div class="feature-chip">👥 Multi-team rooms</div>
+      <div class="feature-chip">📊 Live budget tracker</div>
+    </div>
+
+  </div>
+</div>
