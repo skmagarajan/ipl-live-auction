@@ -14,10 +14,12 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import confetti from 'canvas-confetti';
 import { RoomStateService, RoomData, SoldPlayer, BidEntry } from '../../core/services/room-state.service';
 import { AuctionService } from '../../core/services/auction.service';
 
@@ -61,6 +63,7 @@ export interface SummaryRow {
     MatDividerModule,
     MatChipsModule,
     MatSelectModule,
+    MatAutocompleteModule,
     MatSnackBarModule,
     MatTooltipModule,
     MatDialogModule,
@@ -84,6 +87,7 @@ export class Auction implements OnInit, OnDestroy {
 
   bidInput = signal(0);
   pickedPlayerIndex = signal<number | null>(null);
+  playerSearchText = signal('');
   placing = false;
   selling = false;
   skipping = false;
@@ -94,13 +98,15 @@ export class Auction implements OnInit, OnDestroy {
   summaryCols = ['team', 'playersBought', 'totalSpent', 'remainingBudget'];
 
   private lastNotificationAt = 0;
+  private prevStatus = '';
 
   ngOnInit(): void {
     // Start the real-time Firestore listener (reuse if lobby already started it).
     this.roomStateService.watchRoom(this.roomId);
 
     // Show a toast on every client when the auctioneer triggers "Auction Now".
-    // Skip the first emission (page load) to avoid replaying a stale notification.
+    // Trigger confetti on every client when a player is sold.
+    // Skip the first emission (page load) to avoid replaying stale state.
     let initialLoad = true;
     this.roomStateService.room$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -116,8 +122,24 @@ export class Auction implements OnInit, OnDestroy {
             });
           }
         }
+        if (room && !initialLoad && room.status === 'done' && this.prevStatus !== 'done') {
+          this.fireSoldConfetti();
+        }
+        if (room) this.prevStatus = room.status;
         initialLoad = false;
       });
+  }
+
+  private fireSoldConfetti(): void {
+    const duration = 5000;
+    const end = Date.now() + duration;
+    const colors = ['#ffd700', '#ff6b35', '#1565c0', '#4caf50', '#e91e63'];
+    const frame = () => {
+      confetti({ particleCount: 6, angle: 60,  spread: 55, origin: { x: 0 }, colors });
+      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
   }
 
   ngOnDestroy(): void {
@@ -266,7 +288,7 @@ export class Auction implements OnInit, OnDestroy {
     const soldNames = new Set(
       room.soldPlayers.filter(p => p.soldTo === team).map(p => p.playerName)
     );
-    const counts = { WK: 0, BAT: 0, AR: 0, BOWL: 0, UNCAPPED: 0 };
+    const counts = { WK: 0, BAT: 0, AR: 0, BOWL: 0, UNCAPPED: 0, OVERSEAS: 0 };
     for (const p of room.players) {
       if (!soldNames.has(p.name)) continue;
       const r = p.role ?? '';
@@ -275,13 +297,15 @@ export class Auction implements OnInit, OnDestroy {
       else if (['All-rounder','Allrounder','All Rounder'].includes(r)) counts.AR++;
       else if (r === 'Bowler') counts.BOWL++;
       if (p.uncapped) counts.UNCAPPED++;
+      if (p.nationality && p.nationality.toLowerCase() !== 'india') counts.OVERSEAS++;
     }
     return [
+      { role: 'OVERSEAS', title: 'Overseas',     icon: '✈️',                    isEmoji: true,  count: counts.OVERSEAS},
       { role: 'WK',      title: 'Wicket-Keeper', icon: 'assets/icons/wk.svg',  isEmoji: false, count: counts.WK      },
       { role: 'BAT',     title: 'Batter',        icon: 'assets/icons/bat.svg',  isEmoji: false, count: counts.BAT     },
       { role: 'AR',      title: 'All-rounder',   icon: 'assets/icons/all.svg',  isEmoji: false, count: counts.AR      },
       { role: 'BOWL',    title: 'Bowler',        icon: 'assets/icons/ball.svg', isEmoji: false, count: counts.BOWL    },
-      { role: 'UNCAPPED',title: 'Uncapped',      icon: '🌟',                    isEmoji: true,  count: counts.UNCAPPED},
+      { role: 'UNCAPPED', title: 'Uncapped',     icon: '🌟',                    isEmoji: true,  count: counts.UNCAPPED},
     ];
   }
 
@@ -311,9 +335,28 @@ export class Auction implements OnInit, OnDestroy {
     try {
       await this.auctionService.auctionNow(this.roomId, idx);
       this.pickedPlayerIndex.set(null);
+      this.playerSearchText.set('');
     } finally {
       this.picking = false;
     }
+  }
+
+  getFilteredUnsoldPlayers(room: RoomData, search: string): Array<{ name: string; index: number; marqueeType?: string }> {
+    const all = this.getUnsoldPlayers(room);
+    if (!search) return all;
+    const q = search.toLowerCase();
+    return all.filter(p => p.name.toLowerCase().includes(q));
+  }
+
+  displayPlayerName(p: { name: string } | string | null): string {
+    if (!p) return '';
+    return typeof p === 'string' ? p : p.name;
+  }
+
+  onPlayerSelected(event: MatAutocompleteSelectedEvent): void {
+    const p = event.option.value as { index: number; name: string };
+    this.pickedPlayerIndex.set(p.index);
+    this.playerSearchText.set(p.name);
   }
 
   // Returns remaining players in the same marquee tier after the current one.
@@ -323,6 +366,12 @@ export class Auction implements OnInit, OnDestroy {
     return room.players
       .slice(room.currentPlayerIndex + 1)
       .filter(p => p.marqueeType === current.marqueeType);
+  }
+
+  // Returns true if the player is not Indian (overseas).
+  isOverseas(room: RoomData, playerName: string): boolean {
+    const nat = room.players.find(p => p.name === playerName)?.nationality;
+    return !!nat && nat.toLowerCase() !== 'india';
   }
 
   // Returns bid history sorted newest-first.

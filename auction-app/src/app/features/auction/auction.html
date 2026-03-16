@@ -74,7 +74,12 @@
                 @for (p of myPlayers; track p.playerName) {
                   <div class="my-team-entry">
                     <span class="my-team-player-name">{{ p.playerName }}</span>
-                    <span class="my-team-price">₹{{ p.soldFor }} Cr</span>
+                    <span class="my-team-entry-right">
+                      @if (isOverseas(room, p.playerName)) {
+                        <span class="overseas-pill">✈️</span>
+                      }
+                      <span class="my-team-price">₹{{ p.soldFor }} Cr</span>
+                    </span>
                   </div>
                 }
               </div>
@@ -109,19 +114,32 @@
             <mat-card class="player-card">
 
               <div class="player-hero">
-                <div class="player-hero-meta">
-                  @if (player.iplTeam) {
-                    <span class="player-badge team-badge">{{ player.iplTeam }}</span>
-                  }
-                  @if (player.role) {
-                    <span class="player-badge role-badge">{{ player.role }}</span>
-                  }
-                  @if (player.marqueeType) {
-                    <span class="player-badge marquee-badge">{{ player.marqueeType }}</span>
-                  }
+                <div class="player-hero-content">
+                  <div class="player-hero-info">
+                    <div class="player-hero-meta">
+                      @if (player.iplTeam) {
+                        <span class="player-badge team-badge">{{ player.iplTeam }}</span>
+                      }
+                      @if (player.role) {
+                        <span class="player-badge role-badge">{{ player.role }}</span>
+                      }
+                      @if (player.marqueeType) {
+                        <span class="player-badge marquee-badge">{{ player.marqueeType }}</span>
+                      }
+                      @if (player.uncapped) {
+                        <span class="player-badge uncapped-badge">Uncapped</span>
+                      }
+                      @if (player.nationality && player.nationality.toLowerCase() !== 'india') {
+                        <span class="player-badge overseas-hero-badge">✈️</span>
+                      }
+                    </div>
+                    <div class="player-hero-name">{{ player.name }}</div>
+                    <div class="player-hero-base">Base price · ₹{{ player.basePrice }} Cr</div>
+                  </div>
+                  <div class="player-hero-photo">
+                    <img class="player-headshot" [src]="player.headshotUrl || 'https://documents.iplt20.com/ipl/assets/images/Default-Men.png'" [alt]="player.name" />
+                  </div>
                 </div>
-                <div class="player-hero-name">{{ player.name }}</div>
-                <div class="player-hero-base">Base price · ₹{{ player.basePrice }} Cr</div>
               </div>
 
               <mat-card-content>
@@ -212,18 +230,26 @@
                 <div class="pick-player-section">
                   <span class="pick-player-label">Pick next player</span>
                   <mat-form-field appearance="outline" class="pick-player-field">
-                    <mat-label>Select player</mat-label>
-                    <mat-select
-                      [ngModel]="pickedPlayerIndex()"
-                      (ngModelChange)="pickedPlayerIndex.set($event)"
+                    <mat-label>Search player</mat-label>
+                    <input
+                      matInput
+                      [ngModel]="playerSearchText()"
+                      (ngModelChange)="playerSearchText.set($event)"
+                      [matAutocomplete]="playerAuto"
+                      placeholder="Type to filter…"
+                    />
+                    <mat-autocomplete
+                      #playerAuto="matAutocomplete"
+                      [displayWith]="displayPlayerName"
+                      (optionSelected)="onPlayerSelected($event)"
                     >
-                      @for (p of getUnsoldPlayers(room); track p.index) {
-                        <mat-option [value]="p.index">
+                      @for (p of getFilteredUnsoldPlayers(room, playerSearchText()); track p.index) {
+                        <mat-option [value]="p">
                           {{ p.name }}
                           @if (p.marqueeType) { <span class="pick-option-tier"> · {{ p.marqueeType }}</span> }
                         </mat-option>
                       }
-                    </mat-select>
+                    </mat-autocomplete>
                   </mat-form-field>
                   <button
                     mat-stroked-button
@@ -308,7 +334,12 @@
                       @for (p of teamPlayers; track p.playerName) {
                         <div class="player-row">
                           <span class="player-row-name">{{ p.playerName }}</span>
-                          <span class="player-row-price">₹{{ p.soldFor }}</span>
+                          <span class="player-row-right">
+                            @if (isOverseas(room, p.playerName)) {
+                              <span class="overseas-pill">✈️</span>
+                            }
+                            <span class="player-row-price">₹{{ p.soldFor }}</span>
+                          </span>
                         </div>
                       }
                     </div>

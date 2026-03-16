@@ -11,6 +11,7 @@ export interface Player {
   nationality?: string;
   marqueeType?: string;
   uncapped?: boolean;
+  headshotUrl?: string;
 }
 
 export interface SoldPlayer {
