@@ -80,6 +80,23 @@ export class Auction implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
 
+  private readonly teamLogos: Record<string, string> = {
+    'Chennai Super Kings':        'https://documents.iplt20.com/ipl/CSK/logos/Logooutline/CSKoutline.png',
+    'Delhi Capitals':             'https://documents.iplt20.com/ipl/DC/Logos/LogoOutline/DCoutline.png',
+    'Gujarat Titans':             'https://documents.iplt20.com/ipl/GT/Logos/Logooutline/GToutline.png',
+    'Kolkata Knight Riders':      'https://documents.iplt20.com/ipl/KKR/Logos/Logooutline/KKRoutline.png',
+    'Lucknow Super Giants':       'https://documents.iplt20.com/ipl/LSG/Logos/Logooutline/LSGoutline.png',
+    'Mumbai Indians':             'https://documents.iplt20.com/ipl/MI/Logos/Logooutline/MIoutline.png',
+    'Punjab Kings':               'https://documents.iplt20.com/ipl/PBKS/Logos/Logooutline/PBKSoutline.png',
+    'Rajasthan Royals':           'https://documents.iplt20.com/ipl/RR/Logos/RR_Logo.png',
+    'Sunrisers Hyderabad':        'https://documents.iplt20.com/ipl/SRH/Logos/Logooutline/SRHoutline.png',
+    'Royal Challengers Bengaluru':'https://documents.iplt20.com/ipl/RCB/Logos/Logooutline/RCBoutline.png',
+  };
+
+  teamLogoUrl(team: string): string | null {
+    return this.teamLogos[team] ?? null;
+  }
+
   roomId = this.route.snapshot.paramMap.get('roomId')!;
 
   // Identifies which team this browser tab belongs to — carried via ?team= query param.

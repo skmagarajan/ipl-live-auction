@@ -131,10 +131,14 @@
               <div class="player-hero">
                 <div class="player-hero-content">
                   <div class="player-hero-info">
-                    <div class="player-hero-meta">
-                      @if (player.iplTeam) {
+                    @if (player.iplTeam) {
+                      @if (teamLogoUrl(player.iplTeam); as logoUrl) {
+                        <img class="team-logo-hero" [src]="logoUrl" [alt]="player.iplTeam" [title]="player.iplTeam" />
+                      } @else {
                         <span class="player-badge team-badge">{{ player.iplTeam }}</span>
                       }
+                    }
+                    <div class="player-hero-meta">
                       @if (player.role) {
                         <span class="player-badge role-badge">{{ player.role }}</span>
                       }

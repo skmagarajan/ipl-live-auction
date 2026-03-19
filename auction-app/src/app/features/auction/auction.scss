@@ -435,6 +435,14 @@
   color: #fff;
 }
 
+.team-logo-hero {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+  margin-bottom: 0.5rem;
+}
+
 .role-badge {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
@@ -1227,4 +1235,38 @@
 
 .auction-page {
   min-height: 100vh;
+  position: relative;
+  background:
+    url('/assets/bg/bgVector.webp') center / cover no-repeat,
+    url('/assets/bg/comingSoonBg.jpg') center / cover no-repeat;
+
+  /* In light mode: make bare background text white; restore inside cards */
+  html:not(.dark) & {
+    --text-primary:   #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted:     #c0c0c0;
+    --text-faint:     #909090;
+
+    .player-card, .team-card, .bid-history-panel,
+    .my-team-panel, .up-next-panel, .auctioneer-card,
+    .summary-container {
+      --text-primary:   #1a1a1a;
+      --text-secondary: #333;
+      --text-muted:     #555;
+      --text-faint:     #888;
+    }
+  }
+
+  /* Dim the background so UI content stays readable */
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* All direct children sit above the overlay */
+  > * { position: relative; z-index: 1; }
 }
