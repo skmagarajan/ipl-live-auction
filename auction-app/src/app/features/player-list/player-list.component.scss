@@ -10,18 +10,18 @@
   gap: 1rem;
   margin-bottom: 1.25rem;
 
-  h2 { margin: 0; }
+  h2 { margin: 0; color: var(--text-primary); }
 }
 
 .result-count {
   font-size: 0.85rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
 /* ── Filters ── */
 .filters-panel {
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1rem 1.25rem;
   margin-bottom: 1.25rem;
@@ -65,10 +65,11 @@
 
 /* ── Table ── */
 .table-container {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: auto;
   max-height: calc(100vh - 320px);
+  background: var(--bg-card);
 }
 
 .players-table {
@@ -77,6 +78,7 @@
 
 .name-cell {
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 .uncapped-badge {
@@ -97,7 +99,7 @@
 
 .price-cell {
   font-weight: 600;
-  color: #2e7d32;
+  color: var(--color-green);
 }
 
 .team-chip {
@@ -108,6 +110,11 @@
   padding: 2px 8px;
   border-radius: 12px;
   white-space: nowrap;
+
+  html.dark & {
+    background: #0a1e38;
+    color: #90caf9;
+  }
 }
 
 .marquee-chip {
@@ -118,11 +125,18 @@
   padding: 2px 8px;
   border-radius: 12px;
   font-weight: 600;
+
+  html.dark & {
+    background: #2e1200;
+    color: #ffcc80;
+  }
 }
 
 .overseas {
   color: #7b1fa2;
   font-weight: 500;
+
+  html.dark & { color: #ce93d8; }
 }
 
 /* ── States ── */
@@ -136,7 +150,7 @@
   align-items: center;
   gap: 1rem;
   padding: 3rem 0;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .error {
@@ -147,5 +161,5 @@
 .no-data {
   text-align: center;
   padding: 2rem;
-  color: #aaa;
+  color: var(--text-muted);
 }

@@ -136,6 +136,15 @@
   }
 }
 
+@media (max-width: 640px) {
+  .hero-cta {
+    height: 52px !important;
+    padding: 0 1.75rem !important;
+    width: 100%;
+  }
+  .hero-sub { font-size: 0.95rem; }
+}
+
 /* ── Feature chips ── */
 .feature-row {
   display: flex;

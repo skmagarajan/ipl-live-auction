@@ -113,6 +113,49 @@
 
     <mat-divider />
 
+    <!-- Min Requirements -->
+    <section class="min-reqs-section">
+      <mat-slide-toggle
+        [checked]="minReqsEnabled"
+        (change)="onMinReqsToggle($event.checked)"
+      >
+        Minimum Requirements
+      </mat-slide-toggle>
+      <p class="section-hint">When on, pills glow green in the auction once a team hits their target count.</p>
+      @if (minReqsEnabled) {
+      <div class="min-reqs-grid">
+        @for (def of minReqDefs; track def.role) {
+          <div class="min-req-item">
+            @if (def.isEmoji) {
+              <span class="min-req-icon">{{ def.icon }}</span>
+            } @else {
+              <img class="min-req-icon-img" [src]="def.icon" [alt]="def.role" />
+            }
+            <span class="min-req-label">{{ def.label }}</span>
+            <input
+              type="number"
+              min="0"
+              max="15"
+              class="min-req-input"
+              [(ngModel)]="minReqs[def.role]"
+            />
+          </div>
+        }
+      </div>
+      <div class="save-row">
+        <button mat-raised-button class="lobby-btn-secondary" [disabled]="savingReqs" (click)="saveMinReqs()">
+          <mat-icon>save</mat-icon>
+          {{ savingReqs ? 'Saving...' : 'Save Requirements' }}
+        </button>
+        @if (reqsSaved) {
+          <span class="saved-badge"><mat-icon>check_circle</mat-icon> Saved</span>
+        }
+      </div>
+      } <!-- end @if minReqsEnabled -->
+    </section>
+
+    <mat-divider />
+
     <!-- Start Auction -->
     <section class="start-section">
       <button

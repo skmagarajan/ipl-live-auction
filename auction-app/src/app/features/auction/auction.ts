@@ -99,6 +99,8 @@ export class Auction implements OnInit, OnDestroy {
 
   private lastNotificationAt = 0;
   private prevStatus = '';
+  private prevSoldCount = 0;
+  soldBanner = signal<{ playerName: string; soldTo: string; soldFor: number; headshotUrl?: string } | null>(null);
 
   ngOnInit(): void {
     // Start the real-time Firestore listener (reuse if lobby already started it).
@@ -122,10 +124,19 @@ export class Auction implements OnInit, OnDestroy {
             });
           }
         }
+        if (room && !initialLoad && room.soldPlayers.length > this.prevSoldCount) {
+          const last = room.soldPlayers[room.soldPlayers.length - 1];
+          const headshotUrl = room.players.find(p => p.name === last.playerName)?.headshotUrl;
+          this.soldBanner.set({ ...last, headshotUrl });
+          setTimeout(() => this.soldBanner.set(null), 3500);
+        }
         if (room && !initialLoad && room.status === 'done' && this.prevStatus !== 'done') {
           this.fireSoldConfetti();
         }
-        if (room) this.prevStatus = room.status;
+        if (room) {
+          this.prevSoldCount = room.soldPlayers.length;
+          this.prevStatus = room.status;
+        }
         initialLoad = false;
       });
   }
@@ -284,7 +295,7 @@ export class Auction implements OnInit, OnDestroy {
   }
 
   // Returns WK / BAT / AR / BOWL / UNCAPPED counts with icon info for a team.
-  getTeamRoleBadges(room: RoomData, team: string): { role: string; title: string; icon: string; isEmoji: boolean; count: number }[] {
+  getTeamRoleBadges(room: RoomData, team: string): { role: string; title: string; icon: string; isEmoji: boolean; count: number; min: number; met: boolean }[] {
     const soldNames = new Set(
       room.soldPlayers.filter(p => p.soldTo === team).map(p => p.playerName)
     );
@@ -299,13 +310,19 @@ export class Auction implements OnInit, OnDestroy {
       if (p.uncapped) counts.UNCAPPED++;
       if (p.nationality && p.nationality.toLowerCase() !== 'india') counts.OVERSEAS++;
     }
+    const reqs = room.minRequirements ?? {};
+    const enabled = room.minReqsEnabled ?? false;
+    const metFor = (role: string, count: number) => {
+      if (!enabled) return false;
+      return count >= (reqs[role] ?? 0);
+    };
     return [
-      { role: 'OVERSEAS', title: 'Overseas',     icon: '✈️',                    isEmoji: true,  count: counts.OVERSEAS},
-      { role: 'WK',      title: 'Wicket-Keeper', icon: 'assets/icons/wk.svg',  isEmoji: false, count: counts.WK      },
-      { role: 'BAT',     title: 'Batter',        icon: 'assets/icons/bat.svg',  isEmoji: false, count: counts.BAT     },
-      { role: 'AR',      title: 'All-rounder',   icon: 'assets/icons/all.svg',  isEmoji: false, count: counts.AR      },
-      { role: 'BOWL',    title: 'Bowler',        icon: 'assets/icons/ball.svg', isEmoji: false, count: counts.BOWL    },
-      { role: 'UNCAPPED', title: 'Uncapped',     icon: '🌟',                    isEmoji: true,  count: counts.UNCAPPED},
+      { role: 'OVERSEAS', title: 'Overseas',     icon: '✈️',                    isEmoji: true,  count: counts.OVERSEAS, min: reqs['OVERSEAS'] ?? 0, met: metFor('OVERSEAS', counts.OVERSEAS) },
+      { role: 'WK',      title: 'Wicket-Keeper', icon: 'assets/icons/wk.svg',  isEmoji: false, count: counts.WK,       min: reqs['WK']       ?? 0, met: metFor('WK',       counts.WK)       },
+      { role: 'BAT',     title: 'Batter',        icon: 'assets/icons/bat.svg',  isEmoji: false, count: counts.BAT,      min: reqs['BAT']      ?? 0, met: metFor('BAT',      counts.BAT)      },
+      { role: 'AR',      title: 'All-rounder',   icon: 'assets/icons/all.svg',  isEmoji: false, count: counts.AR,       min: reqs['AR']       ?? 0, met: metFor('AR',       counts.AR)       },
+      { role: 'BOWL',    title: 'Bowler',        icon: 'assets/icons/ball.svg', isEmoji: false, count: counts.BOWL,     min: reqs['BOWL']     ?? 0, met: metFor('BOWL',     counts.BOWL)     },
+      { role: 'UNCAPPED', title: 'Uncapped',     icon: '🌟',                    isEmoji: true,  count: counts.UNCAPPED, min: reqs['UNCAPPED'] ?? 0, met: metFor('UNCAPPED', counts.UNCAPPED) },
     ];
   }
 

@@ -66,6 +66,14 @@ export class Room {
     await updateDoc(doc(this.firestore, 'rooms', roomId), { players });
   }
 
+  async setMinRequirements(roomId: string, reqs: Record<string, number>): Promise<void> {
+    await updateDoc(doc(this.firestore, 'rooms', roomId), { minRequirements: reqs });
+  }
+
+  async setMinReqsEnabled(roomId: string, enabled: boolean): Promise<void> {
+    await updateDoc(doc(this.firestore, 'rooms', roomId), { minReqsEnabled: enabled });
+  }
+
   async setRandomisePick(roomId: string, value: boolean): Promise<void> {
     await updateDoc(doc(this.firestore, 'rooms', roomId), { randomisePick: value });
   }

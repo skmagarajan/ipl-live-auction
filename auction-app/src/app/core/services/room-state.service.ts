@@ -40,6 +40,8 @@ export interface RoomData {
   bidHistory: BidEntry[];
   randomisePick: boolean;
   notification?: { message: string; at: number };
+  minRequirements?: Record<string, number>;
+  minReqsEnabled?: boolean;
 }
 
 @Injectable({

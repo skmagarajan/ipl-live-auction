@@ -213,6 +213,77 @@
   margin: 0.25rem 0 0.75rem;
 }
 
+/* ── Min Requirements ── */
+.min-reqs-section {
+  margin: 1.5rem 0;
+
+  .section-hint { margin-top: 0.5rem; }
+}
+
+.min-reqs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.min-req-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+
+.min-req-icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.min-req-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+
+  :host-context(html.dark) & { filter: invert(1) brightness(1.1); }
+}
+
+.min-req-label {
+  flex: 1;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.min-req-input {
+  width: 40px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card-alt);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 2px 4px;
+  flex-shrink: 0;
+
+  &:focus {
+    outline: none;
+    border-color: #1565c0;
+  }
+
+  /* Hide spinner arrows */
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button { -webkit-appearance: none; }
+  -moz-appearance: textfield;
+}
+
 /* ── Randomise pick ── */
 .randomise-section {
   margin: 1.5rem 0;
@@ -241,6 +312,11 @@ mat-form-field { width: 100%; }
 }
 
 mat-divider { margin: 0.5rem 0; }
+
+@media (max-width: 640px) {
+  .lobby-container { margin: 1rem auto; }
+  .waiting-screen { padding: 2rem 1rem; }
+}
 
 /* ── Shared action buttons (matches home/register style) ── */
 .lobby-btn-secondary {

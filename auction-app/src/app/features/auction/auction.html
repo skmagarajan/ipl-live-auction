@@ -48,6 +48,21 @@
 
   <!-- ── LIVE AUCTION ── -->
   } @else {
+    @if (soldBanner(); as banner) {
+      <div class="sold-banner-overlay">
+        <div class="sold-banner-card">
+          <img class="sold-banner-photo"
+               [src]="banner.headshotUrl || 'https://documents.iplt20.com/ipl/assets/images/Default-Men.png'"
+               [alt]="banner.playerName" />
+          <div class="sold-banner-label">SOLD!</div>
+          <div class="sold-banner-player">{{ banner.playerName }}</div>
+          <div class="sold-banner-detail">
+            <span class="sold-banner-team">{{ banner.soldTo }}</span>
+            <span class="sold-banner-price">₹{{ banner.soldFor }} Cr</span>
+          </div>
+        </div>
+      </div>
+    }
     @if (currentPlayer(room); as player) {
       <div class="auction-page">
 
@@ -177,7 +192,7 @@
 
                 <div class="quick-bid-row">
                   <span class="quick-bid-label">Quick bid</span>
-                  @for (inc of [0.1, 0.5, 1]; track inc) {
+                  @for (inc of [0.25, 0.5, 1]; track inc) {
                     <button
                       mat-stroked-button
                       class="quick-bid-btn"
@@ -292,7 +307,8 @@
                     <div class="role-pill"
                          [attr.data-role]="b.role"
                          [class.role-pill-empty]="b.count === 0"
-                         [matTooltip]="b.title"
+                         [class.role-pill-met]="b.met"
+                         [matTooltip]="b.min > 0 ? b.title + ' · ' + b.count + '/' + b.min : b.title"
                          matTooltipPosition="above">
                       @if (b.isEmoji) {
                         <span class="role-pill-emoji">{{ b.icon }}</span>
@@ -300,6 +316,9 @@
                         <img class="role-pill-icon" [src]="b.icon" [alt]="b.role" />
                       }
                       <span class="role-pill-count">{{ b.count }}</span>
+                      @if (b.met) {
+                        <span class="role-pill-check">✓</span>
+                      }
                     </div>
                   }
                 </div>

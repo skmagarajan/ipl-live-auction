@@ -58,6 +58,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
   copied = false;
   saving = false;
   saveError = '';
+  savingReqs = false;
+  reqsSaved = false;
+
+  minReqDefs = [
+    { role: 'OVERSEAS', label: 'Overseas',      icon: '✈️',                    isEmoji: true  },
+    { role: 'WK',       label: 'Wicket-Keeper', icon: 'assets/icons/wk.svg',  isEmoji: false },
+    { role: 'BAT',      label: 'Batter',        icon: 'assets/icons/bat.svg', isEmoji: false },
+    { role: 'AR',       label: 'All-rounder',   icon: 'assets/icons/all.svg', isEmoji: false },
+    { role: 'BOWL',     label: 'Bowler',        icon: 'assets/icons/ball.svg',isEmoji: false },
+    { role: 'UNCAPPED', label: 'Uncapped',      icon: '🌟',                    isEmoji: true  },
+  ];
+
+  minReqs: Record<string, number> = { OVERSEAS: 2, WK: 1, BAT: 2, AR: 1, BOWL: 2, UNCAPPED: 2 };
+  minReqsEnabled = false;
+  private minReqsLoaded = false;
 
   // Drag-and-drop marquee order — default follows BAT/WK/BOWL/AR tier progression.
   marqueeOrder: MarqueeType[] = [
@@ -94,6 +109,12 @@ export class LobbyComponent implements OnInit, OnDestroy {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(room => {
       if (!room) return;
+
+      if (!this.minReqsLoaded) {
+        if (room.minRequirements) this.minReqs = { ...this.minReqs, ...room.minRequirements };
+        if (room.minReqsEnabled !== undefined) this.minReqsEnabled = room.minReqsEnabled;
+        this.minReqsLoaded = true;
+      }
 
       if (room.status === 'auction') {
         this.router.navigate(['/room', this.roomId, 'auction'], {
@@ -142,6 +163,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
     } finally {
       this.saving = false;
     }
+  }
+
+  onMinReqsToggle(enabled: boolean): void {
+    this.minReqsEnabled = enabled;
+    this.roomService.setMinReqsEnabled(this.roomId, enabled);
+  }
+
+  async saveMinReqs(): Promise<void> {
+    if (this.savingReqs) return;
+    this.savingReqs = true;
+    this.reqsSaved = true;
+    this.roomService.setMinRequirements(this.roomId, { ...this.minReqs }).finally(() => {
+      this.savingReqs = false;
+      setTimeout(() => (this.reqsSaved = false), 2000);
+    });
   }
 
   async onAuctioneerChange(teamName: string): Promise<void> {
